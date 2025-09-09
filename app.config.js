@@ -25,7 +25,9 @@ module.exports = ({ config }) => {
       ios: {
         supportsTablet: false,
         bundleIdentifier: "com.floramind.aiplantai",
-        buildNumber: "9",
+        buildNumber: "11",
+        requireFullScreen: true,
+        deviceFamily: [1, 2],
         infoPlist: {
           ITSAppUsesNonExemptEncryption: false,
           CFBundleAllowMixedLocalizations: true,
@@ -33,7 +35,8 @@ module.exports = ({ config }) => {
           NSPhotoLibraryUsageDescription: "FloraMind needs access to your photo library to identify plants from your existing photos. This helps you discover what plants you have and get personalized care advice.",
           NSCameraUsageDescription: "FloraMind uses your camera to take photos of plants for instant AI-powered identification. This is the core feature that helps you identify and learn about plants around you.",
           NSLocationWhenInUseUsageDescription: "FloraMind uses your location to provide personalized plant care recommendations based on your local climate and growing conditions. This helps ensure your plants thrive in your specific environment.",
-          UIRequiredDeviceCapabilities: ["armv7"],
+          UIRequiredDeviceCapabilities: ["armv7", "camera-flash", "still-camera"],
+          UIDeviceFamily: [1, 2],
           UIStatusBarStyle: "UIStatusBarStyleLightContent",
           UILaunchStoryboardName: "LaunchScreen",
           UIViewControllerBasedStatusBarAppearance: false,
@@ -85,11 +88,11 @@ module.exports = ({ config }) => {
       privacy: "public",
       primaryColor: "#1B5E20",
       backgroundColor: "#1B5E20",
-      owner: "devdeving",
+      owner: "js4941662",
       githubUrl: "https://github.com/crisprking/floramind-ai-plants",
       extra: {
         eas: {
-          projectId: "6740d3ed-af30-4484-8c58-b3cbc205157a"
+          projectId: "290f054b-a542-4603-8217-d5b7e8ed5ea2"
         }
       },
       plugins: [

@@ -413,12 +413,12 @@ export default function App() {
 
   const showAccountDeletion = () => {
     Alert.alert(
-      'Account Deletion',
-      'FloraMind AI does not require account creation for basic plant identification features. All plant identification data is processed locally on your device and is not stored on our servers.\n\nIf you have any concerns about data privacy or wish to contact us, please reach out at support@floramind.ai',
+      'No Account Required',
+      'FloraMind AI does not require account creation or registration. All plant identification features work immediately without any sign-up process.\n\nYour plant photos and identification data are processed locally on your device and are never stored on our servers. No personal information is collected or required.\n\nFor support, contact us at support@floramind.ai',
       [
         { text: 'OK', style: 'default' },
         { text: 'Contact Support', onPress: () => {
-          Linking.openURL('mailto:support@floramind.app?subject=Privacy Inquiry');
+          Linking.openURL('mailto:support@floramind.ai?subject=Privacy Inquiry');
         }}
       ]
     );
@@ -650,7 +650,7 @@ export default function App() {
               <TouchableOpacity onPress={showAccountDeletion}>
                 <Text style={styles.footerLink}>Privacy & Data Policy</Text>
               </TouchableOpacity>
-              <Text style={styles.footerText}>No account required • FloraMind AI v1.0.0</Text>
+              <Text style={styles.footerText}>No registration required • FloraMind AI v1.0.0</Text>
             </View>
           </ScrollView>
         </SafeAreaView>
