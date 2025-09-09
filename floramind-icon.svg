@@ -1,0 +1,47 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#34C759;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1A7F3A;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="leaf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2E7D32;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="stem" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#A0522D;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8B4513;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1024" height="1024" fill="url(#bg)" rx="180" ry="180"/>
+  
+  <!-- Main stem -->
+  <rect x="480" y="200" width="64" height="400" fill="url(#stem)" rx="32" ry="32"/>
+  
+  <!-- Left large leaf -->
+  <ellipse cx="350" cy="300" rx="120" ry="80" fill="url(#leaf)" transform="rotate(-20 350 300)"/>
+  
+  <!-- Right large leaf -->
+  <ellipse cx="674" cy="300" rx="120" ry="80" fill="url(#leaf)" transform="rotate(20 674 300)"/>
+  
+  <!-- Top left leaf -->
+  <ellipse cx="450" cy="180" rx="60" ry="40" fill="url(#leaf)" transform="rotate(-30 450 180)"/>
+  
+  <!-- Top right leaf -->
+  <ellipse cx="574" cy="180" rx="60" ry="40" fill="url(#leaf)" transform="rotate(30 574 180)"/>
+  
+  <!-- AI Badge background -->
+  <circle cx="800" cy="200" r="80" fill="#FFD700" stroke="#FFA000" stroke-width="4"/>
+  
+  <!-- AI text -->
+  <text x="800" y="220" font-family="Arial, sans-serif" font-size="48" font-weight="bold" text-anchor="middle" fill="#000">AI</text>
+  
+  <!-- Small decorative elements -->
+  <circle cx="200" cy="400" r="8" fill="#4CAF50" opacity="0.7"/>
+  <circle cx="824" cy="400" r="8" fill="#4CAF50" opacity="0.7"/>
+  <circle cx="300" cy="500" r="6" fill="#4CAF50" opacity="0.5"/>
+  <circle cx="724" cy="500" r="6" fill="#4CAF50" opacity="0.5"/>
+</svg>
+
