@@ -10,7 +10,7 @@ module.exports = ({ config }) => {
     expo: {
       ...config.expo,
       name: "FloraMind AI",
-      slug: "floramind-ai-plant-ai",
+      slug: "plantaithebestone",
       version: "1.0.0",
       orientation: "portrait",
       icon: "./assets/icon.png",
