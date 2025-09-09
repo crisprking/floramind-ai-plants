@@ -355,3 +355,4 @@ For support, email support@floramind.ai or join our Discord community.
 **Made with ❤️ for plant lovers everywhere**
 
 *FloraMind AI - Where technology meets nature*
+

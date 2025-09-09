@@ -148,3 +148,4 @@ plants, AI, identification, gardening, plant care, botany, green, nature, sustai
 - **Privacy Policy**: https://floramind.app/privacy
 - **Terms of Service**: https://floramind.app/terms
 
+

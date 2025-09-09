@@ -439,3 +439,4 @@ export class PlantDatabase {
     return plant.diseases;
   }
 }
+

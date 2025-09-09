@@ -153,3 +153,4 @@ Your FloraMind app is now the ultimate plant identification and health diagnosis
 ---
 
 *Created with ❤️ by integrating the best of your existing projects into one powerful plant AI application.*
+

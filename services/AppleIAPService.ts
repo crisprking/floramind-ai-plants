@@ -168,3 +168,4 @@ class AppleIAPService {
 }
 
 export const appleIAPService = new AppleIAPService();
+

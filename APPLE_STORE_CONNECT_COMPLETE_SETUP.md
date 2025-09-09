@@ -202,3 +202,4 @@ eas submit --platform ios --profile production
 - **GitHub**: crisprking/floramind-ai-plants
 
 Your FloraMind AI plants app is now fully configured for Apple Store Connect submission! 🎉
+

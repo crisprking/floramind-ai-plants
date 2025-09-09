@@ -135,3 +135,4 @@ Your FloraMind AI plants app is now fully compliant with Apple's guidelines and 
 - ✅ Complete App Store Connect setup
 
 **Ready for Git push and App Store submission!** 🚀
+
