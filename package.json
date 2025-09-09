@@ -45,7 +45,8 @@
     "build": "expo export",
     "build:ios": "eas build --platform ios",
     "build:android": "eas build --platform android",
-    "prebuild": "npm install --no-package-lock"
+    "prebuild": "npm install --no-package-lock --no-audit --no-fund",
+    "postinstall": "echo 'Using npm for dependency management'"
   },
   "dependencies": {
     "expo": "~53.0.22",
@@ -80,5 +81,6 @@
   "private": true,
   "engines": {
     "node": ">=18.0.0"
-  }
+  },
+  "packageManager": "npm@9.0.0"
 }

@@ -10,7 +10,11 @@
         "simulator": true
       },
       "env": {
-        "NPM_CONFIG_PACKAGE_LOCK": "false"
+        "NPM_CONFIG_PACKAGE_LOCK": "false",
+        "NPM_CONFIG_LOCKFILE": "false"
+      },
+      "cache": {
+        "disabled": true
       }
     },
     "preview": {
@@ -19,7 +23,11 @@
         "simulator": true
       },
       "env": {
-        "NPM_CONFIG_PACKAGE_LOCK": "false"
+        "NPM_CONFIG_PACKAGE_LOCK": "false",
+        "NPM_CONFIG_LOCKFILE": "false"
+      },
+      "cache": {
+        "disabled": true
       }
     },
     "production": {
@@ -27,7 +35,11 @@
         "simulator": false
       },
       "env": {
-        "NPM_CONFIG_PACKAGE_LOCK": "false"
+        "NPM_CONFIG_PACKAGE_LOCK": "false",
+        "NPM_CONFIG_LOCKFILE": "false"
+      },
+      "cache": {
+        "disabled": true
       }
     }
   },
