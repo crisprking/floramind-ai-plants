@@ -89,7 +89,7 @@ module.exports = ({ config }) => {
       githubUrl: "https://github.com/crisprking/floramind-ai-plants",
       extra: {
         eas: {
-          projectId: "6740d3ed-af30-4484-8c58-b3cbc205157a"
+          projectId: "290f054b"
         }
       },
       plugins: [
