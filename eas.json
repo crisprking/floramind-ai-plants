@@ -20,6 +20,9 @@
     "production": {
       "ios": {
         "simulator": false
+      },
+      "env": {
+        "NPM_CONFIG_PACKAGE_LOCK": "false"
       }
     }
   },
