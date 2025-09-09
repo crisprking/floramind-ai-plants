@@ -1,10 +1,51 @@
 {
   "name": "floramind-ai-plant-ai",
   "version": "1.0.0",
+  "description": "The most advanced AI-powered plant care assistant that combines machine learning, environmental consciousness, and community insights to revolutionize how you care for your plants.",
   "main": "index.ts",
+  "author": "Abraham Trueba <abrahamtrueba9898@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/abrahamtrueba9898/rork-verdai#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abrahamtrueba9898/rork-verdai.git"
+  },
+  "keywords": [
+    "plants",
+    "AI",
+    "identification",
+    "gardening",
+    "plant-care",
+    "botany",
+    "green",
+    "nature",
+    "sustainability",
+    "environment",
+    "smart",
+    "assistant",
+    "health",
+    "monitoring",
+    "tips",
+    "recommendations",
+    "machine-learning",
+    "computer-vision",
+    "plant-database",
+    "care-guide",
+    "react-native",
+    "expo",
+    "typescript",
+    "mobile",
+    "ios"
+  ],
   "scripts": {
     "start": "expo start",
-    "build": "expo export"
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "build": "expo export",
+    "build:ios": "eas build --platform ios",
+    "build:android": "eas build --platform android",
+    "prebuild": "npm install --no-package-lock"
   },
   "dependencies": {
     "expo": "~53.0.22",
@@ -36,5 +77,8 @@
     "sharp": "^0.34.3",
     "typescript": "~5.8.3"
   },
-  "private": true
+  "private": true,
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }
