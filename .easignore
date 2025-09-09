@@ -2,7 +2,6 @@
 # This file tells EAS which files to exclude from the build
 
 # Lockfiles (let EAS generate its own)
-bun.lockb
 package-lock.json
 yarn.lock
 
