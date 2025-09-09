@@ -43,12 +43,12 @@ runTest('App.json is valid JSON', () => {
 
 runTest('App name is correct', () => {
   const appJson = JSON.parse(fs.readFileSync('app.json', 'utf8'));
-  return appJson.expo.name === 'FloraMind: AI Plants';
+  return appJson.expo.name === 'floramind ai plant ai';
 }, 'Configuration');
 
 runTest('App slug is correct', () => {
   const appJson = JSON.parse(fs.readFileSync('app.json', 'utf8'));
-  return appJson.expo.slug === 'floramind-ai-plants';
+  return appJson.expo.slug === 'floramind-ai-plant-ai';
 }, 'Configuration');
 
 runTest('App version is correct', () => {
@@ -59,7 +59,7 @@ runTest('App version is correct', () => {
 // Test 6-10: iOS Configuration
 runTest('iOS bundle identifier is correct', () => {
   const appJson = JSON.parse(fs.readFileSync('app.json', 'utf8'));
-  return appJson.expo.ios.bundleIdentifier === 'com.floramind.aiplants';
+  return appJson.expo.ios.bundleIdentifier === 'com.floramind.aiplantai';
 }, 'Configuration');
 
 runTest('iOS build number is set', () => {
@@ -94,7 +94,7 @@ runTest('Package.json is valid JSON', () => {
 
 runTest('Package name is correct', () => {
   const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-  return packageJson.name === 'floramind-ai-plants';
+  return packageJson.name === 'floramind-ai-plant-ai';
 }, 'Configuration');
 
 runTest('Package version is correct', () => {
