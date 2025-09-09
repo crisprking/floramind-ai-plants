@@ -1,0 +1,30 @@
+# EAS Build ignore file
+# This file tells EAS which files to exclude from the build
+
+# Lockfiles (let EAS generate its own)
+bun.lockb
+package-lock.json
+yarn.lock
+
+# Development files
+.env.local
+.env.development
+.env.test
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp

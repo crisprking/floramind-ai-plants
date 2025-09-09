@@ -4,6 +4,10 @@ bun.lockb
 package-lock.json
 yarn.lock
 
+# Build artifacts
+dist/
+build/
+
 # Expo
 .expo/
 dist/

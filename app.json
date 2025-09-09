@@ -110,13 +110,6 @@
     "extra": {
       "eas": {
         "projectId": "62dd7ba0-2464-4f85-bb5d-85731a3b5ce0"
-      },
-      "expoClient": {
-        "splash": {
-          "image": "./assets/splash-icon.png",
-          "resizeMode": "contain",
-          "backgroundColor": "#1B5E20"
-        }
       }
     },
     "plugins": [
@@ -136,24 +129,6 @@
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "FloraMind uses your location to provide personalized plant care recommendations based on your local climate and growing conditions. This helps ensure your plants thrive in your specific environment."
-        }
-      ],
-      [
-        "expo-router",
-        {
-          "root": "./index.ts"
-        }
-      ],
-      [
-        "expo-web-browser",
-        {
-          "schemes": ["floramind-ai-plant-ai"]
-        }
-      ],
-      [
-        "expo-font",
-        {
-          "fonts": ["./assets/fonts/"]
         }
       ]
     ]
