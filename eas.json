@@ -8,26 +8,17 @@
       "distribution": "internal",
       "ios": {
         "simulator": true
-      },
-      "env": {
-        "NPM_CONFIG_PACKAGE_LOCK": "false"
       }
     },
     "preview": {
       "distribution": "internal",
       "ios": {
         "simulator": true
-      },
-      "env": {
-        "NPM_CONFIG_PACKAGE_LOCK": "false"
       }
     },
     "production": {
       "ios": {
         "simulator": false
-      },
-      "env": {
-        "NPM_CONFIG_PACKAGE_LOCK": "false"
       }
     }
   },

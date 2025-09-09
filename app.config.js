@@ -4,7 +4,6 @@ module.exports = ({ config }) => {
   // Force npm usage in build environment
   process.env.NPM_CONFIG_PACKAGE_LOCK = 'false';
   process.env.NPM_CONFIG_LOCKFILE = 'false';
-  process.env.BUN_INSTALL_FROZEN = 'false';
   
   return {
     ...config,
