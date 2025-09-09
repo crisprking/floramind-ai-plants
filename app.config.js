@@ -85,11 +85,11 @@ module.exports = ({ config }) => {
       privacy: "public",
       primaryColor: "#1B5E20",
       backgroundColor: "#1B5E20",
-      owner: "js4941662",
+      owner: "devdeving",
       githubUrl: "https://github.com/crisprking/floramind-ai-plants",
       extra: {
         eas: {
-          projectId: "6740d3ed-af30-4484-8c58-b3cbc205157a"
+          projectId: "290f054b"
         }
       },
       plugins: [
