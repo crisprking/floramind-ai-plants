@@ -1,7 +1,7 @@
 {
   "name": "floramind-ai-plant-ai",
   "version": "1.0.0",
-  "description": "The most advanced AI-powered plant care assistant that combines machine learning, environmental consciousness, and community insights to revolutionize how you care for your plants.",
+  "description": "FloraMind AI - The most advanced AI-powered plant identification and health diagnosis assistant that combines machine learning with comprehensive botanical knowledge to revolutionize plant care.",
   "main": "index.ts",
   "author": "Abraham Trueba <abrahamtrueba9898@gmail.com>",
   "license": "MIT",

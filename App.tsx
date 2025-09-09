@@ -23,23 +23,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { appleIAPService, PRODUCT_IDS } from './services/AppleIAPService';
+import { realAIService, PlantIdentification, PlantDiagnosis } from './services/RealAIService';
+import { PlantDatabase } from './services/PlantDatabase';
+import { useUsageControl } from './hooks/useUsageControl';
 
 const { width, height } = Dimensions.get('window');
 
-interface PlantIdentification {
+interface PlantIdentificationResult extends PlantIdentification {
   id: string;
-  name: string;
-  scientificName: string;
-  confidence: number;
-  careTips: string[];
-  wateringSchedule: string;
-  lightRequirements: string;
-  commonIssues: string[];
   image?: string;
-  rarity: 'common' | 'uncommon' | 'rare' | 'epic';
-  difficulty: 'easy' | 'medium' | 'hard' | 'expert';
-  growthRate: 'slow' | 'moderate' | 'fast';
-  toxicity: 'safe' | 'mild' | 'toxic';
 }
 
 interface PremiumFeature {
@@ -54,17 +46,20 @@ interface PremiumFeature {
 export default function App() {
   // Core state
   const [isLoading, setIsLoading] = useState(false);
-  const [identifiedPlant, setIdentifiedPlant] = useState<PlantIdentification | null>(null);
+  const [identifiedPlant, setIdentifiedPlant] = useState<PlantIdentificationResult | null>(null);
+  const [plantDiagnosis, setPlantDiagnosis] = useState<PlantDiagnosis | null>(null);
   const [cameraPermission, setCameraPermission] = useState<ImagePicker.PermissionStatus | null>(null);
   const [mediaLibraryPermission, setMediaLibraryPermission] = useState<ImagePicker.PermissionStatus | null>(null);
   const [locationPermission, setLocationPermission] = useState<Location.PermissionStatus | null>(null);
   const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
-  const [isPremium, setIsPremium] = useState(false);
-  const [identificationsUsed, setIdentificationsUsed] = useState(0);
-  const [maxFreeIdentifications] = useState(5);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
-  const [currentStep, setCurrentStep] = useState<'welcome' | 'camera' | 'result' | 'premium'>('welcome');
+  const [currentStep, setCurrentStep] = useState<'welcome' | 'camera' | 'result' | 'premium' | 'diagnosis'>('welcome');
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [currentMode, setCurrentMode] = useState<'identify' | 'diagnose'>('identify');
+
+  // Usage control
+  const { usage, canUseFeature, trackUsage, getUpgradeMessage, getRemainingTime } = useUsageControl();
 
   // Animation refs
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -148,13 +143,13 @@ export default function App() {
         Animated.timing(pulseAnim, {
           toValue: 1.1,
           duration: 1000,
-          easing: Easing.inOut(Easing.sine),
+          easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
         Animated.timing(pulseAnim, {
           toValue: 1,
           duration: 1000,
-          easing: Easing.inOut(Easing.sine),
+          easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         })
       ])
@@ -202,7 +197,7 @@ export default function App() {
     if (cameraPermission !== 'granted') {
       Alert.alert(
         'Camera Permission Required',
-        'FloraMind needs camera access to identify plants. Grant permission for the best experience!',
+        'FloraMind AI needs camera access to identify plants. Grant permission for the best experience!',
         [
           { text: 'Cancel', style: 'cancel' },
           { text: 'Grant Permission', onPress: () => requestPermissions() },
@@ -212,7 +207,7 @@ export default function App() {
       return;
     }
 
-    if (!isPremium && identificationsUsed >= maxFreeIdentifications) {
+    if (usage && usage.tier !== 'premium' && usage.count >= usage.limit) {
       setShowPremiumModal(true);
       return;
     }
@@ -224,12 +219,9 @@ export default function App() {
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
       // Enhanced camera permission check for iPhone
-      const cameraStatus = await Camera.getCameraPermissionsAsync();
-      if (cameraStatus.status !== 'granted') {
-        const newStatus = await Camera.requestCameraPermissionsAsync();
-        if (newStatus.status !== 'granted') {
-          throw new Error('Camera permission denied');
-        }
+      const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
+      if (cameraStatus !== 'granted') {
+        throw new Error('Camera permission denied');
       }
 
       const result = await ImagePicker.launchCameraAsync({
@@ -250,7 +242,12 @@ export default function App() {
       if (result.assets && result.assets[0]) {
         const asset = result.assets[0];
         if (asset.uri) {
-          await identifyPlant(asset.uri);
+          setSelectedImage(asset.uri);
+          if (currentMode === 'identify') {
+            await identifyPlant(asset.uri);
+          } else {
+            await diagnosePlant(asset.uri);
+          }
         } else {
           throw new Error('No image captured');
         }
@@ -275,7 +272,7 @@ export default function App() {
     if (mediaLibraryPermission !== 'granted') {
       Alert.alert(
         'Photo Library Permission Required',
-        'FloraMind needs access to your photos to identify plants. Grant permission for the best experience!',
+        'FloraMind AI needs access to your photos to identify plants. Grant permission for the best experience!',
         [
           { text: 'Cancel', style: 'cancel' },
           { text: 'Grant Permission', onPress: () => requestPermissions() },
@@ -285,7 +282,7 @@ export default function App() {
       return;
     }
 
-    if (!isPremium && identificationsUsed >= maxFreeIdentifications) {
+    if (usage && usage.tier !== 'premium' && usage.count >= usage.limit) {
       setShowPremiumModal(true);
       return;
     }
@@ -313,7 +310,12 @@ export default function App() {
       if (result.assets && result.assets[0]) {
         const asset = result.assets[0];
         if (asset.uri) {
-          await identifyPlant(asset.uri);
+          setSelectedImage(asset.uri);
+          if (currentMode === 'identify') {
+            await identifyPlant(asset.uri);
+          } else {
+            await diagnosePlant(asset.uri);
+          }
         } else {
           throw new Error('No image selected');
         }
@@ -339,102 +341,66 @@ export default function App() {
       setIsLoading(true);
       setCurrentStep('camera');
       
-      // Simulate AI processing with realistic timing
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Check usage limits
+      const canUse = await canUseFeature('identify');
+      if (!canUse) {
+        setShowPremiumModal(true);
+        setCurrentStep('welcome');
+        return;
+      }
+
+      // Use real AI service for plant identification
+      const result = await realAIService.identifyPlant(imageUri);
       
-      // Array of diverse plant identifications for realistic results
-      const plantDatabase = [
-        {
-          name: 'Monstera Deliciosa',
-          scientificName: 'Monstera deliciosa',
-          confidence: 96,
-          careTips: [
-            'Water when top 2 inches of soil are dry',
-            'Provide bright, indirect light for best growth',
-            'Mist leaves regularly to increase humidity',
-            'Fertilize monthly during growing season',
-            'Rotate plant weekly for even growth'
-          ],
-          wateringSchedule: 'Every 7-10 days',
-          lightRequirements: 'Bright, indirect light',
-          commonIssues: [
-            'Yellow leaves indicate overwatering',
-            'Brown tips suggest low humidity',
-            'No holes in leaves means insufficient light',
-            'Drooping leaves may indicate underwatering'
-          ],
-          rarity: 'common',
-          difficulty: 'easy',
-          growthRate: 'fast',
-          toxicity: 'mild'
-        },
-        {
-          name: 'Snake Plant',
-          scientificName: 'Dracaena trifasciata',
-          confidence: 94,
-          careTips: [
-            'Water sparingly - only when soil is completely dry',
-            'Thrives in low to bright indirect light',
-            'Very drought tolerant - perfect for beginners',
-            'Fertilize every 2-3 months during growing season',
-            'Repot every 2-3 years in well-draining soil'
-          ],
-          wateringSchedule: 'Every 2-3 weeks',
-          lightRequirements: 'Low to bright indirect light',
-          commonIssues: [
-            'Root rot from overwatering is the main issue',
-            'Brown tips may indicate fluoride in water',
-            'Leaves may droop if severely underwatered',
-            'Yellow leaves often mean too much water'
-          ],
-          rarity: 'common',
-          difficulty: 'easy',
-          growthRate: 'slow',
-          toxicity: 'mild'
-        },
-        {
-          name: 'Fiddle Leaf Fig',
-          scientificName: 'Ficus lyrata',
-          confidence: 92,
-          careTips: [
-            'Water when top inch of soil is dry',
-            'Needs bright, indirect light - avoid direct sun',
-            'Keep humidity above 40%',
-            'Rotate weekly for even growth',
-            'Wipe leaves monthly to remove dust'
-          ],
-          wateringSchedule: 'Every 7-10 days',
-          lightRequirements: 'Bright, indirect light',
-          commonIssues: [
-            'Leaf drop often indicates overwatering',
-            'Brown spots may be from inconsistent watering',
-            'Drooping leaves suggest underwatering',
-            'Yellow leaves can indicate nutrient deficiency'
-          ],
-          rarity: 'uncommon',
-          difficulty: 'medium',
-          growthRate: 'moderate',
-          toxicity: 'mild'
-        }
-      ];
-      
-      // Randomly select a plant for variety
-      const selectedPlant = plantDatabase[Math.floor(Math.random() * plantDatabase.length)];
-      
-      const mockPlant: PlantIdentification = {
+      const plantResult: PlantIdentificationResult = {
         id: Date.now().toString(),
-        ...selectedPlant,
+        ...result,
         image: imageUri
       };
 
-      setIdentifiedPlant(mockPlant);
-      setIdentificationsUsed(prev => prev + 1);
+      setIdentifiedPlant(plantResult);
       setCurrentStep('result');
+      
+      // Track usage
+      await trackUsage('identify');
+      
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
       console.error('Identification error:', error);
       setCurrentStep('welcome');
       Alert.alert('Error', 'Failed to identify plant. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const diagnosePlant = async (imageUri: string) => {
+    try {
+      setIsLoading(true);
+      setCurrentStep('camera');
+      
+      // Check usage limits
+      const canUse = await canUseFeature('diagnose');
+      if (!canUse) {
+        setShowPremiumModal(true);
+        setCurrentStep('welcome');
+        return;
+      }
+
+      // Use real AI service for plant diagnosis
+      const result = await realAIService.diagnosePlant(imageUri);
+      
+      setPlantDiagnosis(result);
+      setCurrentStep('diagnosis');
+      
+      // Track usage
+      await trackUsage('diagnose');
+      
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      console.error('Diagnosis error:', error);
+      setCurrentStep('welcome');
+      Alert.alert('Error', 'Failed to diagnose plant. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -448,7 +414,7 @@ export default function App() {
   const showAccountDeletion = () => {
     Alert.alert(
       'Account Deletion',
-      'FloraMind does not require account creation for basic plant identification features. All plant identification data is processed locally on your device and is not stored on our servers.\n\nIf you have any concerns about data privacy or wish to contact us, please reach out at support@floramind.app',
+      'FloraMind AI does not require account creation for basic plant identification features. All plant identification data is processed locally on your device and is not stored on our servers.\n\nIf you have any concerns about data privacy or wish to contact us, please reach out at support@floramind.ai',
       [
         { text: 'OK', style: 'default' },
         { text: 'Contact Support', onPress: () => {
@@ -465,11 +431,11 @@ export default function App() {
       
       if (result.success) {
         if (feature.id === PRODUCT_IDS.MONTHLY || feature.id === PRODUCT_IDS.YEARLY) {
-          setIsPremium(true);
+          // Premium status is handled by useUsageControl hook
           setShowPremiumModal(false);
-          Alert.alert('Success!', 'Welcome to FloraMind Premium! Enjoy unlimited plant identification.');
+          Alert.alert('Success!', 'Welcome to FloraMind AI Premium! Enjoy unlimited plant identification and health diagnosis.');
         } else {
-          setIdentificationsUsed(0);
+          // Usage reset is handled by useUsageControl hook
           setShowPremiumModal(false);
           const packSize = feature.id === PRODUCT_IDS.PACK_10 ? '10' : '50';
           Alert.alert('Success!', `You now have ${packSize} plant identifications!`);
@@ -512,7 +478,7 @@ export default function App() {
                 <View style={styles.logoGlow} />
               </View>
               
-              <Text style={styles.title}>FloraMind</Text>
+              <Text style={styles.title}>FloraMind AI</Text>
               <Text style={styles.subtitle}>AI Plant Intelligence</Text>
               <Text style={styles.tagline}>Discover, Identify, and Care for Your Plants</Text>
             </Animated.View>
@@ -544,18 +510,54 @@ export default function App() {
               </View>
             </Animated.View>
 
+            {/* Mode Selection */}
+            <Animated.View style={[styles.modeSelector, { opacity: fadeAnim }]}>
+              <TouchableOpacity
+                style={[styles.modeButton, currentMode === 'identify' && styles.modeButtonActive]}
+                onPress={() => setCurrentMode('identify')}
+              >
+                <Ionicons 
+                  name="leaf-outline" 
+                  size={24} 
+                  color={currentMode === 'identify' ? '#FFFFFF' : '#1B4332'} 
+                />
+                <Text style={[styles.modeButtonText, currentMode === 'identify' && styles.modeButtonTextActive]}>
+                  Identify Plant
+                </Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.modeButton, currentMode === 'diagnose' && styles.modeButtonActive]}
+                onPress={() => setCurrentMode('diagnose')}
+              >
+                <Ionicons 
+                  name="medical-outline" 
+                  size={24} 
+                  color={currentMode === 'diagnose' ? '#FFFFFF' : '#1B4332'} 
+                />
+                <Text style={[styles.modeButtonText, currentMode === 'diagnose' && styles.modeButtonTextActive]}>
+                  Health Check
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
+
             {/* Usage Info */}
             <Animated.View style={[styles.usageInfo, { opacity: fadeAnim }]}>
               <View style={styles.usageCard}>
                 <Text style={styles.usageText}>
-                  Free Identifications: {identificationsUsed}/{maxFreeIdentifications}
+                  {usage ? `${usage.count}/${usage.limit} ${currentMode === 'identify' ? 'identifications' : 'diagnoses'} remaining today` : 'Loading...'}
                 </Text>
                 <View style={styles.progressBar}>
-                  <View style={[styles.progressFill, { width: `${(identificationsUsed / maxFreeIdentifications) * 100}%` }]} />
+                  <View style={[styles.progressFill, { width: usage ? `${(usage.count / usage.limit) * 100}%` : '0%' }]} />
                 </View>
+                {usage && usage.tier !== 'premium' && (
+                  <Text style={styles.usageResetText}>
+                    Resets in {getRemainingTime()}
+                  </Text>
+                )}
               </View>
               
-              {!isPremium && (
+              {usage && usage.tier !== 'premium' && (
                 <TouchableOpacity 
                   style={styles.premiumButton}
                   onPress={() => setShowPremiumModal(true)}
@@ -584,9 +586,9 @@ export default function App() {
                 >
                   <Ionicons name="camera" size={24} color="#fff" />
                   <Text style={styles.buttonText}>
-                    {isLoading ? 'Identifying...' : 
+                    {isLoading ? (currentMode === 'identify' ? 'Identifying...' : 'Diagnosing...') : 
                      !canTakePhoto() ? 'Camera Not Available' : 
-                     '📸 Take Photo'}
+                     currentMode === 'identify' ? '📸 Identify Plant' : '🔍 Check Health'}
                   </Text>
                 </LinearGradient>
               </TouchableOpacity>
@@ -648,7 +650,7 @@ export default function App() {
               <TouchableOpacity onPress={showAccountDeletion}>
                 <Text style={styles.footerLink}>Privacy & Data Policy</Text>
               </TouchableOpacity>
-              <Text style={styles.footerText}>No account required • FloraMind AI Plants v1.0.0</Text>
+              <Text style={styles.footerText}>No account required • FloraMind AI v1.0.0</Text>
             </View>
           </ScrollView>
         </SafeAreaView>
@@ -763,6 +765,143 @@ export default function App() {
     </Animated.View>
   );
 
+  const renderDiagnosisScreen = () => (
+    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
+      <LinearGradient
+        colors={plantDiagnosis?.healthStatus === 'healthy' ? ['#1B5E20', '#2E7D32', '#4CAF50'] :
+                plantDiagnosis?.healthStatus === 'warning' ? ['#E65100', '#FF9800', '#FFC107'] :
+                ['#B71C1C', '#D32F2F', '#F44336']}
+        style={styles.gradientBackground}
+      >
+        <SafeAreaView style={styles.safeArea}>
+          <StatusBar style="light" />
+          
+          <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+            {/* Diagnosis Header */}
+            <Animated.View style={[styles.resultHeader, { transform: [{ scale: scaleAnim }] }]}>
+              <View style={styles.successIcon}>
+                <Ionicons 
+                  name={plantDiagnosis?.healthStatus === 'healthy' ? 'checkmark-circle' :
+                        plantDiagnosis?.healthStatus === 'warning' ? 'warning' : 'alert-circle'} 
+                  size={60} 
+                  color={plantDiagnosis?.healthStatus === 'healthy' ? '#4CAF50' :
+                         plantDiagnosis?.healthStatus === 'warning' ? '#FF9800' : '#F44336'} 
+                />
+              </View>
+              <Text style={styles.resultTitle}>
+                {plantDiagnosis?.healthStatus === 'healthy' ? 'Plant is Healthy!' :
+                 plantDiagnosis?.healthStatus === 'warning' ? 'Needs Attention' : 'Critical Issues Found'}
+              </Text>
+              <Text style={styles.confidenceText}>Confidence: {plantDiagnosis?.confidence}%</Text>
+            </Animated.View>
+
+            {/* Diagnosis Card */}
+            <Animated.View style={[styles.plantCard, { opacity: fadeAnim }]}>
+              <BlurView intensity={20} style={styles.plantCardBlur}>
+                <View style={styles.plantImageContainer}>
+                  {selectedImage && (
+                    <Image source={{ uri: selectedImage }} style={styles.plantImage} />
+                  )}
+                  <View style={[styles.rarityBadge, { 
+                    backgroundColor: plantDiagnosis?.healthStatus === 'healthy' ? '#4CAF50' :
+                                   plantDiagnosis?.healthStatus === 'warning' ? '#FF9800' : '#F44336'
+                  }]}>
+                    <Text style={styles.rarityText}>
+                      {plantDiagnosis?.healthStatus?.toUpperCase() || 'UNKNOWN'}
+                    </Text>
+                  </View>
+                </View>
+                
+                <View style={styles.plantInfo}>
+                  <Text style={styles.plantName}>Health Assessment</Text>
+                  <Text style={styles.scientificName}>
+                    {plantDiagnosis?.urgency === 'high' ? 'Urgent Care Needed' :
+                     plantDiagnosis?.urgency === 'medium' ? 'Moderate Attention Required' :
+                     'Routine Care Recommended'}
+                  </Text>
+                  
+                  {plantDiagnosis?.estimatedRecoveryTime && (
+                    <View style={styles.recoveryTime}>
+                      <Ionicons name="time" size={16} color="#4CAF50" />
+                      <Text style={styles.recoveryText}>
+                        Estimated Recovery: {plantDiagnosis.estimatedRecoveryTime}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </BlurView>
+            </Animated.View>
+
+            {/* Issues Found */}
+            {plantDiagnosis?.issues && plantDiagnosis.issues.length > 0 && (
+              <Animated.View style={[styles.section, { opacity: fadeAnim }]}>
+                <Text style={styles.sectionTitle}>Issues Found</Text>
+                <View style={styles.issuesList}>
+                  {plantDiagnosis.issues.map((issue, index) => (
+                    <View key={index} style={styles.issueItem}>
+                      <Ionicons name="alert-circle" size={16} color="#F44336" />
+                      <Text style={styles.issueText}>{issue}</Text>
+                    </View>
+                  ))}
+                </View>
+              </Animated.View>
+            )}
+
+            {/* Solutions */}
+            {plantDiagnosis?.solutions && plantDiagnosis.solutions.length > 0 && (
+              <Animated.View style={[styles.section, { opacity: fadeAnim }]}>
+                <Text style={styles.sectionTitle}>Recommended Solutions</Text>
+                <View style={styles.solutionsList}>
+                  {plantDiagnosis.solutions.map((solution, index) => (
+                    <View key={index} style={styles.solutionItem}>
+                      <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
+                      <Text style={styles.solutionText}>{solution}</Text>
+                    </View>
+                  ))}
+                </View>
+              </Animated.View>
+            )}
+
+            {/* Prevention Tips */}
+            {plantDiagnosis?.preventionTips && plantDiagnosis.preventionTips.length > 0 && (
+              <Animated.View style={[styles.section, { opacity: fadeAnim }]}>
+                <Text style={styles.sectionTitle}>Prevention Tips</Text>
+                <View style={styles.preventionList}>
+                  {plantDiagnosis.preventionTips.map((tip, index) => (
+                    <View key={index} style={styles.preventionItem}>
+                      <Ionicons name="shield-checkmark" size={16} color="#2196F3" />
+                      <Text style={styles.preventionText}>{tip}</Text>
+                    </View>
+                  ))}
+                </View>
+              </Animated.View>
+            )}
+
+            {/* Action Buttons */}
+            <Animated.View style={[styles.actionButtons, { opacity: fadeAnim }]}>
+              <TouchableOpacity 
+                style={styles.primaryButton}
+                onPress={() => {
+                  setPlantDiagnosis(null);
+                  setSelectedImage(null);
+                  setCurrentStep('welcome');
+                }}
+              >
+                <LinearGradient
+                  colors={['#4CAF50', '#2E7D32']}
+                  style={styles.buttonGradient}
+                >
+                  <Ionicons name="camera" size={20} color="#fff" />
+                  <Text style={styles.buttonText}>Check Another Plant</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </Animated.View>
+          </ScrollView>
+        </SafeAreaView>
+      </LinearGradient>
+    </Animated.View>
+  );
+
   const renderPremiumModal = () => (
     <Animated.View style={[styles.modalOverlay, { opacity: fadeAnim }]}>
       <BlurView intensity={50} style={styles.modalBlur}>
@@ -822,6 +961,10 @@ export default function App() {
 
   if (identifiedPlant) {
     return renderResultScreen();
+  }
+
+  if (plantDiagnosis) {
+    return renderDiagnosisScreen();
   }
 
   return renderWelcomeScreen();
@@ -1337,5 +1480,90 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: '#666',
     fontSize: 16,
+  },
+  // Mode Selector Styles
+  modeSelector: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 16,
+    padding: 4,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  modeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    gap: 8,
+  },
+  modeButtonActive: {
+    backgroundColor: '#1B4332',
+  },
+  modeButtonText: {
+    color: '#1B4332',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  modeButtonTextActive: {
+    color: '#FFFFFF',
+  },
+  // Usage Reset Text
+  usageResetText: {
+    color: '#B2DFDB',
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 4,
+  },
+  // Diagnosis Screen Styles
+  recoveryTime: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    gap: 4,
+  },
+  recoveryText: {
+    color: '#4CAF50',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  issuesList: {
+    gap: 8,
+  },
+  solutionsList: {
+    gap: 8,
+  },
+  solutionItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  solutionText: {
+    color: '#C8E6C9',
+    fontSize: 14,
+    flex: 1,
+    lineHeight: 20,
+  },
+  preventionList: {
+    gap: 8,
+  },
+  preventionItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
+  preventionText: {
+    color: '#BBDEFB',
+    fontSize: 14,
+    flex: 1,
+    lineHeight: 20,
+  },
+  // Section style for diagnosis screen
+  section: {
+    marginBottom: 20,
   },
 });
