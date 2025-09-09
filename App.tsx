@@ -22,6 +22,7 @@ import * as Camera from 'expo-camera';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
+import { appleIAPService, PRODUCT_IDS } from './services/AppleIAPService';
 
 const { width, height } = Dimensions.get('window');
 
@@ -75,7 +76,7 @@ export default function App() {
   // Premium features
   const premiumFeatures: PremiumFeature[] = [
     {
-      id: 'monthly',
+      id: PRODUCT_IDS.MONTHLY,
       title: 'Premium Monthly',
       description: 'Unlimited identifications, advanced AI insights, plant health monitoring, and premium care recommendations',
       icon: 'diamond',
@@ -83,21 +84,21 @@ export default function App() {
       popular: true
     },
     {
-      id: 'yearly',
+      id: PRODUCT_IDS.YEARLY,
       title: 'Premium Yearly',
       description: 'Best value! Save 67% with annual subscription. All premium features included.',
       icon: 'star',
       price: 19.99
     },
     {
-      id: 'pack10',
+      id: PRODUCT_IDS.PACK_10,
       title: '10 Identifications',
       description: 'Perfect for occasional plant lovers. No subscription required.',
       icon: 'leaf',
       price: 2.99
     },
     {
-      id: 'pack50',
+      id: PRODUCT_IDS.PACK_50,
       title: '50 Identifications',
       description: 'Great for plant enthusiasts. Best value for identification packs.',
       icon: 'flower',
@@ -222,17 +223,22 @@ export default function App() {
       setCurrentStep('camera');
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-      const isCameraAvailable = await Camera.getCameraPermissionsAsync();
-      if (isCameraAvailable.status !== 'granted') {
-        throw new Error('Camera not available');
+      // Enhanced camera permission check for iPhone
+      const cameraStatus = await Camera.getCameraPermissionsAsync();
+      if (cameraStatus.status !== 'granted') {
+        const newStatus = await Camera.requestCameraPermissionsAsync();
+        if (newStatus.status !== 'granted') {
+          throw new Error('Camera permission denied');
+        }
       }
 
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 0.9,
+        quality: 0.8, // Reduced quality for better iPhone performance
         exif: false,
+        base64: false,
       });
 
       if (result.canceled) {
@@ -253,7 +259,7 @@ export default function App() {
       }
     } catch (error) {
       console.error('Camera error:', error);
-      setCameraError('Camera failed to capture image');
+      setCameraError('Camera failed to capture image. Please try again.');
       setCurrentStep('welcome');
       
       Alert.alert('Camera Error', 'Failed to take photo. Please try again or use gallery.', [
@@ -442,29 +448,43 @@ export default function App() {
   const showAccountDeletion = () => {
     Alert.alert(
       'Account Deletion',
-      'To delete your account and all associated data, please contact us at support@floramind.app or visit our website at www.floramind.app/delete-account. We will process your request within 24 hours.',
+      'FloraMind does not require account creation for basic plant identification features. All plant identification data is processed locally on your device and is not stored on our servers.\n\nIf you have any concerns about data privacy or wish to contact us, please reach out at support@floramind.app',
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'OK', style: 'default' },
         { text: 'Contact Support', onPress: () => {
-          Linking.openURL('mailto:support@floramind.app?subject=Account Deletion Request');
-        }},
-        { text: 'Visit Website', onPress: () => {
-          Linking.openURL('https://www.floramind.app/delete-account');
+          Linking.openURL('mailto:support@floramind.app?subject=Privacy Inquiry');
         }}
       ]
     );
   };
 
-  const purchasePremium = (feature: PremiumFeature) => {
-    // Simulate purchase
-    if (feature.id === 'monthly' || feature.id === 'yearly') {
-      setIsPremium(true);
-      setShowPremiumModal(false);
-      Alert.alert('Success!', 'Welcome to FloraMind Premium! Enjoy unlimited plant identification.');
-    } else {
-      setIdentificationsUsed(0);
-      setShowPremiumModal(false);
-      Alert.alert('Success!', `You now have ${feature.id === 'pack10' ? '10' : '50'} plant identifications!`);
+  const purchasePremium = async (feature: PremiumFeature) => {
+    try {
+      setIsLoading(true);
+      const result = await appleIAPService.purchaseProduct(feature.id);
+      
+      if (result.success) {
+        if (feature.id === PRODUCT_IDS.MONTHLY || feature.id === PRODUCT_IDS.YEARLY) {
+          setIsPremium(true);
+          setShowPremiumModal(false);
+          Alert.alert('Success!', 'Welcome to FloraMind Premium! Enjoy unlimited plant identification.');
+        } else {
+          setIdentificationsUsed(0);
+          setShowPremiumModal(false);
+          const packSize = feature.id === PRODUCT_IDS.PACK_10 ? '10' : '50';
+          Alert.alert('Success!', `You now have ${packSize} plant identifications!`);
+        }
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } else {
+        Alert.alert('Purchase Failed', result.error || 'Unable to complete purchase. Please try again.');
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      }
+    } catch (error) {
+      console.error('Purchase error:', error);
+      Alert.alert('Purchase Error', 'Something went wrong. Please try again.');
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -626,9 +646,9 @@ export default function App() {
             {/* Footer */}
             <View style={styles.footer}>
               <TouchableOpacity onPress={showAccountDeletion}>
-                <Text style={styles.footerLink}>Account Deletion</Text>
+                <Text style={styles.footerLink}>Privacy & Data Policy</Text>
               </TouchableOpacity>
-              <Text style={styles.footerText}>FloraMind AI Plants v1.0.0</Text>
+              <Text style={styles.footerText}>No account required • FloraMind AI Plants v1.0.0</Text>
             </View>
           </ScrollView>
         </SafeAreaView>

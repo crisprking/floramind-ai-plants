@@ -10,11 +10,7 @@
         "simulator": true
       },
       "env": {
-        "NPM_CONFIG_PACKAGE_LOCK": "false",
-        "NPM_CONFIG_LOCKFILE": "false"
-      },
-      "cache": {
-        "disabled": true
+        "BUN_INSTALL_FROZEN": "false"
       }
     },
     "preview": {
@@ -23,11 +19,7 @@
         "simulator": true
       },
       "env": {
-        "NPM_CONFIG_PACKAGE_LOCK": "false",
-        "NPM_CONFIG_LOCKFILE": "false"
-      },
-      "cache": {
-        "disabled": true
+        "BUN_INSTALL_FROZEN": "false"
       }
     },
     "production": {
@@ -35,11 +27,7 @@
         "simulator": false
       },
       "env": {
-        "NPM_CONFIG_PACKAGE_LOCK": "false",
-        "NPM_CONFIG_LOCKFILE": "false"
-      },
-      "cache": {
-        "disabled": true
+        "BUN_INSTALL_FROZEN": "false"
       }
     }
   },

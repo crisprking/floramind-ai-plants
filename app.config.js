@@ -23,9 +23,9 @@ module.exports = ({ config }) => {
         backgroundColor: "#1B5E20"
       },
       ios: {
-        supportsTablet: true,
+        supportsTablet: false,
         bundleIdentifier: "com.floramind.aiplantai",
-        buildNumber: "8",
+        buildNumber: "9",
         infoPlist: {
           ITSAppUsesNonExemptEncryption: false,
           CFBundleAllowMixedLocalizations: true,
@@ -51,7 +51,7 @@ module.exports = ({ config }) => {
         },
         associatedDomains: ["applinks:floramind.app"],
         entitlements: {
-          "com.apple.developer.in-app-payments": true,
+          "com.apple.developer.in-app-payments": ["merchant.com.floramind.aiplantai"],
           "com.apple.developer.associated-domains": true
         }
       },
@@ -85,11 +85,11 @@ module.exports = ({ config }) => {
       privacy: "public",
       primaryColor: "#1B5E20",
       backgroundColor: "#1B5E20",
-      owner: "verdai",
-      githubUrl: "https://github.com/abrahamtrueba9898/rork-verdai",
+      owner: "js4941662",
+      githubUrl: "https://github.com/crisprking/floramind-ai-plants",
       extra: {
         eas: {
-          projectId: "62dd7ba0-2464-4f85-bb5d-85731a3b5ce0"
+          projectId: "6740d3ed-af30-4484-8c58-b3cbc205157a"
         }
       },
       plugins: [

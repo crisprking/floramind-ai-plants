@@ -25,8 +25,9 @@ export interface PurchaseResult {
   error?: string;
 }
 
-class InAppPurchaseService {
+class AppleIAPService {
   private isInitialized = false;
+  private products: Product[] = [];
 
   async initialize(): Promise<boolean> {
     if (Platform.OS !== 'ios') {
@@ -35,13 +36,13 @@ class InAppPurchaseService {
     }
 
     try {
-      // In a real implementation, you would initialize the IAP service here
+      // In a real implementation, you would initialize StoreKit here
       // For now, we'll simulate successful initialization
       this.isInitialized = true;
-      console.log('IAP Service initialized');
+      console.log('Apple IAP Service initialized');
       return true;
     } catch (error) {
-      console.error('Failed to initialize IAP service:', error);
+      console.error('Failed to initialize Apple IAP service:', error);
       return false;
     }
   }
@@ -51,8 +52,8 @@ class InAppPurchaseService {
       await this.initialize();
     }
 
-    // Mock products for development
-    return [
+    // Mock products for development - these should match your App Store Connect products
+    this.products = [
       {
         productId: PRODUCT_IDS.MONTHLY,
         price: '4.99',
@@ -90,6 +91,8 @@ class InAppPurchaseService {
         type: 'consumable'
       }
     ];
+
+    return this.products;
   }
 
   async purchaseProduct(productId: string): Promise<PurchaseResult> {
@@ -98,20 +101,20 @@ class InAppPurchaseService {
     }
 
     try {
-      // In a real implementation, you would handle the actual purchase here
+      // In a real implementation, you would use StoreKit to purchase
       // For now, we'll simulate a successful purchase
-      console.log(`Simulating purchase of ${productId}`);
+      console.log(`Simulating Apple Store purchase of ${productId}`);
       
       // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
       return {
         success: true,
         productId,
-        transactionId: `txn_${Date.now()}`,
+        transactionId: `apple_txn_${Date.now()}`,
       };
     } catch (error) {
-      console.error('Purchase failed:', error);
+      console.error('Apple Store purchase failed:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Purchase failed',
@@ -125,8 +128,8 @@ class InAppPurchaseService {
     }
 
     try {
-      // In a real implementation, you would restore previous purchases here
-      console.log('Restoring purchases...');
+      // In a real implementation, you would restore previous purchases from Apple
+      console.log('Restoring Apple Store purchases...');
       
       // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -134,10 +137,10 @@ class InAppPurchaseService {
       return [{
         success: true,
         productId: PRODUCT_IDS.MONTHLY,
-        transactionId: `restored_${Date.now()}`,
+        transactionId: `restored_apple_${Date.now()}`,
       }];
     } catch (error) {
-      console.error('Restore failed:', error);
+      console.error('Apple Store restore failed:', error);
       return [{
         success: false,
         error: error instanceof Error ? error.message : 'Restore failed',
@@ -147,9 +150,21 @@ class InAppPurchaseService {
 
   async validateReceipt(receipt: string): Promise<boolean> {
     // In a real implementation, you would validate the receipt with Apple's servers
-    console.log('Validating receipt...');
+    console.log('Validating Apple Store receipt...');
     return true;
+  }
+
+  // Check if user has active subscription
+  async hasActiveSubscription(): Promise<boolean> {
+    // In a real implementation, you would check Apple's subscription status
+    return false; // Default to false for testing
+  }
+
+  // Get subscription expiration date
+  async getSubscriptionExpiration(): Promise<Date | null> {
+    // In a real implementation, you would get this from Apple
+    return null;
   }
 }
 
-export const iapService = new InAppPurchaseService();
+export const appleIAPService = new AppleIAPService();

@@ -1,11 +1,11 @@
 [install]
-# Disable lockfile generation to prevent conflicts
-lockfile = false
-# Use npm registry
-registry = "https://registry.npmjs.org/"
 # Disable frozen lockfile checks
 frozen = false
+# Allow updates
+update = true
+# Use npm registry
+registry = "https://registry.npmjs.org/"
 
 [install.cache]
-# Disable caching to prevent lockfile issues
+# Disable caching
 disabled = true
