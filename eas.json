@@ -10,7 +10,7 @@
         "simulator": true
       },
       "env": {
-        "BUN_INSTALL_FROZEN": "false"
+        "NPM_CONFIG_PACKAGE_LOCK": "false"
       }
     },
     "preview": {
@@ -19,7 +19,7 @@
         "simulator": true
       },
       "env": {
-        "BUN_INSTALL_FROZEN": "false"
+        "NPM_CONFIG_PACKAGE_LOCK": "false"
       }
     },
     "production": {
@@ -27,16 +27,16 @@
         "simulator": false
       },
       "env": {
-        "BUN_INSTALL_FROZEN": "false"
+        "NPM_CONFIG_PACKAGE_LOCK": "false"
       }
     }
   },
   "submit": {
     "production": {
       "ios": {
-        "appleId": "your-apple-id@example.com",
-        "ascAppId": "your-app-store-connect-app-id",
-        "appleTeamId": "your-apple-team-id"
+        "appleId": "abrahamtrueba@berkeley.edu",
+        "ascAppId": "com.floramind.aiplantai",
+        "appleTeamId": "K2W4SX33VD"
       }
     }
   }
