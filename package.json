@@ -46,7 +46,9 @@
     "build:ios": "eas build --platform ios",
     "build:android": "eas build --platform android",
     "prebuild": "npm install --no-package-lock --no-audit --no-fund",
-    "postinstall": "echo 'Using npm for dependency management'"
+    "postinstall": "echo 'Using npm for dependency management'",
+    "setup-supabase": "node scripts/setup-supabase.js",
+    "test-supabase": "node -e \"console.log('Testing Supabase connection...'); require('./services/SupabaseService').supabase.from('plants').select('count').then(r => console.log('✅ Supabase connected!')).catch(e => console.log('❌ Supabase connection failed:', e.message))\""
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.1.2",

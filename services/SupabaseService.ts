@@ -1,10 +1,22 @@
 import { createClient } from '@supabase/supabase-js';
+import { getSupabaseConfig } from '../supabase/config';
 
-// Supabase configuration
-const supabaseUrl = 'https://your-project.supabase.co';
-const supabaseKey = 'your-anon-key';
+// Get Supabase configuration
+const config = getSupabaseConfig();
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Create Supabase client
+export const supabase = createClient(config.url, config.anonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10
+    }
+  }
+});
 
 // Database types
 export interface Plant {
