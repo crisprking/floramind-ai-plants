@@ -27,7 +27,7 @@
     "production": {
       "ios": {
         "appleId": "abrahamtrueba@berkeley.edu",
-        "ascAppId": "com.floramind.aiplants",
+        "ascAppId": "com.floramind.plants",
         "appleTeamId": "K2W4SX33VD"
       }
     }
