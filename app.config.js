@@ -24,7 +24,7 @@ module.exports = ({ config }) => {
       },
       ios: {
         supportsTablet: false,
-        bundleIdentifier: "com.floramind.aiplantai",
+        bundleIdentifier: "com.floramind.aiplants",
         buildNumber: "11",
         requireFullScreen: true,
         deviceFamily: [1, 2],
@@ -54,7 +54,7 @@ module.exports = ({ config }) => {
         },
         associatedDomains: ["applinks:floramind.app"],
         entitlements: {
-          "com.apple.developer.in-app-payments": ["merchant.com.floramind.aiplantai"],
+          "com.apple.developer.in-app-payments": ["merchant.com.floramind.aiplants"],
           "com.apple.developer.associated-domains": true
         }
       },
@@ -63,7 +63,7 @@ module.exports = ({ config }) => {
           foregroundImage: "./assets/adaptive-icon.png",
           backgroundColor: "#1B5E20"
         },
-        package: "com.floramind.aiplantai",
+        package: "com.floramind.aiplants",
         permissions: [
           "android.permission.CAMERA",
           "android.permission.READ_EXTERNAL_STORAGE",
