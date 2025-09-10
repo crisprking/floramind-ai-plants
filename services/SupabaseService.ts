@@ -319,11 +319,14 @@ export class SupabaseService {
   static async getPopularPlants(): Promise<Plant[]> {
     const { data, error } = await supabase
       .from('user_plants')
-      .select('plant_id, count')
-      .order('count', { ascending: false })
+      .select(`
+        plant_id,
+        plant:plants(*)
+      `)
+      .order('created_at', { ascending: false })
       .limit(10);
     
     if (error) throw error;
-    return data || [];
+    return (data?.map((item: any) => item.plant).filter(Boolean) || []) as Plant[];
   }
 }

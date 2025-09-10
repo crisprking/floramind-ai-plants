@@ -78,7 +78,7 @@ export const LegendaryPlantCollection: React.FC<LegendaryPlantCollectionProps> =
     }
   };
 
-  const updatePlantHealth = async (plantId: string, healthStatus: string) => {
+  const updatePlantHealth = async (plantId: string, healthStatus: 'excellent' | 'good' | 'fair' | 'poor') => {
     try {
       await SupabaseService.updateUserPlant(plantId, { health_status: healthStatus });
       await loadUserPlants();
