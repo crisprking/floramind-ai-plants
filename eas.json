@@ -19,7 +19,8 @@
     },
     "production": {
       "ios": {
-        "simulator": false
+        "simulator": false,
+        "teamId": "K2W4SX33VD"
       }
     }
   },
