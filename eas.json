@@ -19,7 +19,9 @@
     },
     "production": {
       "ios": {
-        "simulator": false
+        "simulator": false,
+        "appleTeamId": "K2W4SX33VD",
+        "bundleIdentifier": "com.floramind.aiplantai"
       }
     }
   },
